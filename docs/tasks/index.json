@@ -1,0 +1,820 @@
+{
+  "project": "Procurement Agent Workbench",
+  "revision": "2026-10-01",
+  "kind": "planning_only",
+  "core_blocks": 12,
+  "core_subblocks": 48,
+  "optional_subblocks": 4,
+  "blocks": [
+    {
+      "id": "B00",
+      "title": "Fundación del repositorio y contratos",
+      "depends_on": [],
+      "goal": "Dejar un repositorio ejecutable y un lenguaje común para todos los agentes.",
+      "context": "No hay código implementado en esta planificación. Importar este paquete y adaptar el esqueleto al repo real. Las APIs exactas de SDKs se fijan mediante una prueba pequeña; no construir todavía el proceso completo.",
+      "paths": "Raíz, docs/, packages/contracts/, apps/*, pyproject.toml, lockfile y tests/smoke/.",
+      "excluded": "Azure, base de datos de negocio completa, UI elaborada y agente de compras.",
+      "gate": "Un checkout limpio instala versiones fijadas, arranca health endpoints y valida los contratos compartidos.",
+      "tasks": [
+        {
+          "title": "Integrar contexto y decisiones",
+          "mode": "LOCAL",
+          "work": "Inspeccionar el repo y sus instrucciones. Incorporar contexto, contratos y backlog. Crear ADRs para PostgreSQL, demo efímera, separación de identidades y Graph opcional. Registrar qué decisiones siguen abiertas.",
+          "deliver": "Documentación integrada y mapa de rutas; AGENTS.md conciliado.",
+          "accept": "Otra sesión puede localizar stack, alcance y próximo subbloque sin consultar el chat. No se sobrescriben instrucciones previas.",
+          "id": "B00.1",
+          "status": "TODO",
+          "depends_on": []
+        },
+        {
+          "title": "Crear esqueleto y entorno de desarrollo",
+          "mode": "LOCAL",
+          "work": "Configurar Python soportado por la combinación de librerías, gestor de dependencias con lockfile, Ruff, tipos, pytest y Docker. Crear entradas mínimas de API, worker y MCP, configuración tipada y health/readiness distintos.",
+          "deliver": "Proyecto instalable, comandos de desarrollo, .env.example sin secretos y CI local básica.",
+          "accept": "Instalación reproducible y health endpoints comprobados; configuración requerida ausente produce error claro, no valores inventados.",
+          "id": "B00.2",
+          "status": "TODO",
+          "depends_on": [
+            "B00.1"
+          ]
+        },
+        {
+          "title": "Materializar contratos v0",
+          "mode": "LOCAL",
+          "work": "Implementar Pydantic/enums para actores, importes, runs, acciones, decisiones, artefactos y mensajes. Canonicalizar argumentos para hashes y definir errores estables. Separar PurchaseDecision de ActionApproval.",
+          "deliver": "packages/contracts/, schemas exportados y fixtures de contrato.",
+          "accept": "Serialización/deserialización conserva Decimal y versiones; rechaza campos inválidos. Ningún schema expuesto al LLM permite elegir identidad efectiva.",
+          "id": "B00.3",
+          "status": "TODO",
+          "depends_on": [
+            "B00.2"
+          ]
+        },
+        {
+          "title": "Verificar compatibilidad de SDKs",
+          "mode": "LOCAL",
+          "work": "Probar Deep Agents con una herramienta de eco, cliente/servidor MCP mínimo y modelo simulado que use tool calling. Registrar versiones de Deep Agents, LangGraph, MCP y cliente. Verificar saver/store PostgreSQL disponibles sin simular que ya se probó la base.",
+          "deliver": "Prueba ejecutable y docs/adr/compatibility.md con referencias oficiales y versiones fijadas.",
+          "accept": "El recorrido llama realmente al transporte MCP local. Si hay incompatibilidad, se resuelve o registra antes de ampliar el proyecto; no se mantiene un ejemplo que solo importa módulos.",
+          "id": "B00.4",
+          "status": "TODO",
+          "depends_on": [
+            "B00.3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B01",
+      "title": "PostgreSQL local y dataset reproducible",
+      "depends_on": [
+        "B00"
+      ],
+      "goal": "Disponer de datos de compras y documentos coherentes, recargables y baratos.",
+      "context": "El seed es la fuente de una demo nueva. Los IDs de dominio son estables; las identidades Entra se vinculan después. Local y Azure usan las mismas migraciones y contratos de repositorio.",
+      "paths": "migrations/, packages/platform/db/, demo/datasets/v1/, scripts/seed* y compose.",
+      "excluded": "Decisiones del LLM, autenticación Azure y dependencias de Microsoft 365.",
+      "gate": "Dos cargas consecutivas producen el mismo dataset sin duplicados y una BD vacía se reconstruye con migraciones y seed.",
+      "tasks": [
+        {
+          "title": "Crear persistencia y migraciones",
+          "mode": "LOCAL",
+          "work": "Levantar PostgreSQL y Azurite. Crear esquemas/roles locales y migraciones para proyectos, miembros, proveedores, ofertas, inventario, solicitudes, control y auditoría. No dar al worker escritura sobre aprobaciones.",
+          "deliver": "Alembic y repositorios mínimos con transacciones explícitas.",
+          "accept": "Migrar desde vacío funciona; restricciones impiden referencias cruzadas incoherentes y el rol worker no escribe decisiones humanas.",
+          "id": "B01.1",
+          "status": "TODO",
+          "depends_on": [
+            "B00.4"
+          ]
+        },
+        {
+          "title": "Generar dataset y documentos",
+          "mode": "LOCAL",
+          "work": "Crear seis proveedores, doce productos, dos proyectos y ofertas con transporte ausente, vigencia y distintos requisitos. Generar PDF/XLSX legibles con datos idénticos a la fuente estructurada. Definir fecha base y manifiesto/hash.",
+          "deliver": "Fixtures, generadores deterministas y documentos sintéticos.",
+          "accept": "Regenerar con misma semilla produce datos equivalentes; las cifras de documentos coinciden con fixtures y no aparecen datos privados.",
+          "id": "B01.2",
+          "status": "TODO",
+          "depends_on": [
+            "B01.1"
+          ]
+        },
+        {
+          "title": "Implementar seed idempotente",
+          "mode": "LOCAL",
+          "work": "Cargar filas mediante transacciones/upserts y documentos mediante claves estables. Separar seed de reset; este último comprueba environment_id y detiene/cancela runs de demo previos. Añadir mapeo configurable de personas a identidades.",
+          "deliver": "Comandos seed, seed-check y reset acotado al entorno.",
+          "accept": "Ejecutar seed dos veces mantiene conteos y relaciones. Un environment_id incorrecto impide reset. Faltan identidades reales: se informa, no se inventan oids.",
+          "id": "B01.3",
+          "status": "TODO",
+          "depends_on": [
+            "B01.2"
+          ]
+        },
+        {
+          "title": "Definir escenarios y resultados esperados",
+          "mode": "LOCAL",
+          "work": "Preparar diez casos con entradas, hechos verificables, acciones permitidas y resultado esperado. Incluir aclaración, rechazo, acceso ajeno, oferta vencida y duplicación. Separar casos de demo y evaluación reservada.",
+          "deliver": "demo/scenarios/ y evals/datasets/baseline con fecha congelada.",
+          "accept": "Cada caso puede resolverse manualmente con las evidencias disponibles; falta de transporte se representa como desconocida y nunca como coste cero.",
+          "id": "B01.4",
+          "status": "TODO",
+          "depends_on": [
+            "B01.3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B02",
+      "title": "Dominio de compras y servidor MCP",
+      "depends_on": [
+        "B01"
+      ],
+      "goal": "Exponer acciones reales y controladas antes de conectarlas al agente.",
+      "context": "El LLM decide cómo avanzar, pero importes, transiciones de compra y permisos se resuelven con código. Un cliente MCP de prueba debe poder completar el proceso sin LLM.",
+      "paths": "packages/domain/, packages/platform/artifacts/, apps/mcp_server/ y tests/domain,mcp/.",
+      "excluded": "Aprobación autónoma, SQL/shell arbitrarios, pagos y correo externo.",
+      "gate": "Un cliente MCP consulta ofertas, genera un borrador y crea una solicitud; acciones no autorizadas y duplicadas se manejan correctamente.",
+      "tasks": [
+        {
+          "title": "Implementar reglas y cálculos",
+          "mode": "LOCAL",
+          "work": "Crear comparación normalizada con Decimal, EUR, cantidad, impuestos, descuentos y transporte; definir orden/redondeo. Implementar estados y versiones de solicitud, membresía y separación de solicitante/aprobador.",
+          "deliver": "Servicios de dominio sin dependencias del LLM y tests con fixtures B01.",
+          "accept": "Totales coinciden con cálculos de referencia. No se recomienda como plenamente comparable una oferta incompleta sin señalarlo.",
+          "id": "B02.1",
+          "status": "TODO",
+          "depends_on": [
+            "B01.4"
+          ]
+        },
+        {
+          "title": "Ingerir documentos y producir evidencias",
+          "mode": "LOCAL",
+          "work": "Soportar PDF con texto y XLSX del dataset, límites de tamaño y extracción con página/celda. Guardar fuente/hash y campos ambiguos; OCR queda fuera. Generar comparativa estructurada y reporte Markdown/HTML.",
+          "deliver": "Adaptadores de extracción, EvidenceRef y guardado de artefactos.",
+          "accept": "Cada cifra importante se vincula a una fuente; PDF ilegible devuelve resultado explícito y no datos fabricados. HTML se sirve de forma segura.",
+          "id": "B02.2",
+          "status": "TODO",
+          "depends_on": [
+            "B02.1"
+          ]
+        },
+        {
+          "title": "Publicar herramientas MCP y políticas",
+          "mode": "LOCAL",
+          "work": "Implementar Streamable HTTP y las herramientas de CONTRACTS.md sobre dominio. Introducir ActorContext a través de un verificador local explícito; el perfil cloud no permite ese verificador. Aplicar autorización en todas las llamadas, también directas.",
+          "deliver": "Servidor MCP, catálogo de herramientas y policy table.",
+          "accept": "list_tools y call_tool funcionan sobre HTTP. Token/contexto incorrecto y proyecto ajeno se deniegan. approve_purchase_request no está en el catálogo del LLM.",
+          "id": "B02.3",
+          "status": "TODO",
+          "depends_on": [
+            "B02.2"
+          ]
+        },
+        {
+          "title": "Añadir idempotencia y diario de efectos",
+          "mode": "LOCAL",
+          "work": "Registrar action_id y payload_hash. Coordinar escrituras SQL con transacciones y artefactos con publicación idempotente/reconciliación. Crear bandeja demo para aclaraciones y el comando humano de decisión.",
+          "deliver": "Ledger de efectos y pruebas de replay y conflictos.",
+          "accept": "Repetir una solicitud/publicación devuelve el resultado previo; cambiar payload con misma clave falla. Rechazar una compra impide submit_purchase_request.",
+          "id": "B02.4",
+          "status": "TODO",
+          "depends_on": [
+            "B02.3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B03",
+      "title": "Primer agente con pausa duradera",
+      "depends_on": [
+        "B02"
+      ],
+      "goal": "Completar el primer recorrido de compra mediante Deep Agents y PostgreSQL.",
+      "context": "Empezar con un único agente principal y una skill. El entrypoint puede ser CLI; no hace falta esperar a la web. Integrar checkpointer y store reales en PostgreSQL, no un saver en memoria para la prueba de reinicio.",
+      "paths": "packages/agents/, skills/compare-quotes/, scripts/run_local_agent* y tests/agent/.",
+      "excluded": "Multiagente amplio, cloud completo, aprendizaje automático de skills y frontend.",
+      "gate": "Pedir aclaración, terminar el proceso, arrancarlo de nuevo y continuar el mismo hilo sin repetir el efecto.",
+      "tasks": [
+        {
+          "title": "Construir el agente y sus límites",
+          "mode": "LOCAL + LLM",
+          "work": "Configurar create_deep_agent según la versión fijada, modelo intercambiable, herramientas MCP, planificación y límites de pasos/llamadas/tokens. Conservar observaciones/evidencias sin permitir instrucciones de documentos como permisos.",
+          "deliver": "Factory del agente, configuración de modelo y primer procedimiento.",
+          "accept": "Con modelo simulado recorre el caso determinista; una ejecución con modelo real, si está configurado, demuestra tool calling y se registra por separado con consumo.",
+          "id": "B03.1",
+          "status": "TODO",
+          "depends_on": [
+            "B02.4"
+          ]
+        },
+        {
+          "title": "Conectar saver, store y workspace",
+          "mode": "LOCAL",
+          "work": "Inicializar saver/store PostgreSQL mediante su paso de setup y usar thread_id estable. Configurar rutas de workspace, memoria y skills; conservar archivos grandes en Blob/Azurite. Separar namespaces de usuarios/proyectos.",
+          "deliver": "Adaptadores de persistencia y configuración del filesystem virtual.",
+          "accept": "Dos hilos reanudan su propio estado; otro usuario no puede recuperar memoria ajena. Los ficheros no crecen sin límite dentro del checkpoint.",
+          "id": "B03.2",
+          "status": "TODO",
+          "depends_on": [
+            "B03.1"
+          ]
+        },
+        {
+          "title": "Implementar preguntas y aprobaciones",
+          "mode": "LOCAL",
+          "work": "Crear herramientas de pregunta tipada y acción pendiente con interrupt/resume. La respuesta y decisión entran mediante un adaptador humano de CLI, identificado como desarrollo. Validar hashes/versiones y respetar rechazo/edición.",
+          "deliver": "Flujo local de HITL con payloads persistentes.",
+          "accept": "Mientras falta presupuesto no continúa la acción dependiente. Tras reinicio, el mismo interrupt acepta una respuesta válida; una aprobación de otra acción no sirve.",
+          "id": "B03.3",
+          "status": "TODO",
+          "depends_on": [
+            "B03.2"
+          ]
+        },
+        {
+          "title": "Añadir traza mínima y caso completo",
+          "mode": "LOCAL + LLM",
+          "work": "Emitir eventos estructurados correlacionados por run, segmento, tool_call e identidad. Usar precios configurables para estimar coste y ocultar tokens. Automatizar la demo local con un modelo simulado y documentar ejecución real.",
+          "deliver": "Primer smoke end-to-end y reporte baseline de diez casos cuando aplique.",
+          "accept": "Puede reconstruirse el recorrido desde eventos. No se confunden éxito con modelo simulado y éxito real; se conserva evidencia del reinicio y de ausencia de duplicados.",
+          "id": "B03.4",
+          "status": "TODO",
+          "depends_on": [
+            "B03.3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B04",
+      "title": "Prueba temprana de Azure e identidades",
+      "depends_on": [
+        "B03"
+      ],
+      "goal": "Resolver riesgos de UAMI, PostgreSQL, Entra y retirada antes de completar la plataforma.",
+      "context": "Esta es una prueba acotada y temporal. Todavía no requiere la UI ni el worker definitivo. Las piezas Terraform útiles se reutilizan; las apps de eco son identificables como pruebas. Si faltan credenciales, dejar preflight y plan listos y continuar con B05 local.",
+      "paths": "infra/modules/, infra/environments/spike/, scripts/azure_preflight* y tests/cloud_smoke/.",
+      "excluded": "Entorno permanente, servicios de pago adicionales y afirmar que mocks validan UAMIs.",
+      "gate": "Hay evidencia real de conexión UAMI a PostgreSQL/Storage, tokens correctos para MCP y retirada del entorno de prueba, o estado BLOCKED_EXTERNAL explícito.",
+      "tasks": [
+        {
+          "title": "Crear preflight e IaC mínimo",
+          "mode": "LOCAL",
+          "work": "Definir suscripción/tenant/environment_id, variables sin secretos, state protegido, nombres/tags y límites de recursos. Modelar PostgreSQL pequeño, Storage, Key Vault, UAMIs y cómputo mínimo de prueba. Preparar plan/destroy desde el inicio.",
+          "deliver": "Módulos Terraform, validación y checklist ejecutable de prerrequisitos.",
+          "accept": "terraform validate pasa; el preflight detecta permisos/configuración ausentes antes de crear recursos. Recursos y permisos tienen alcance de demo definido.",
+          "id": "B04.1",
+          "status": "TODO",
+          "depends_on": [
+            "B03.4"
+          ]
+        },
+        {
+          "title": "Probar acceso UAMI a datos",
+          "mode": "AZURE",
+          "work": "Aplicar el entorno de prueba configurado. Inicializar roles SQL ligados a los principales reales y GRANT acotados; un contenedor/Job usa tokens para PostgreSQL, Blob y lectura de un secreto de prueba de Key Vault. Probar acceso permitido y denegado y nuevas conexiones del pool.",
+          "deliver": "Script de smoke cloud y registro de IDs/roles sin secretos.",
+          "accept": "La conexión funciona sin contraseña permanente ni storage key; el principal sin permiso recibe denegación, también en Key Vault. No imprimir el secreto. La prueba local no sustituye esta evidencia.",
+          "id": "B04.2",
+          "status": "TODO",
+          "depends_on": [
+            "B04.1"
+          ]
+        },
+        {
+          "title": "Probar identidad de usuario y servicio",
+          "mode": "AZURE",
+          "work": "Registrar cliente/API/MCP de prueba con scopes y app roles. Verificar API a MCP por OBO y UAMI a MCP app-only. Elegir federación UAMI como credencial confidencial si está comprobada; documentar certificado como alternativa si procede.",
+          "deliver": "ADR de autenticación, Terraform Entra y pruebas con endpoints mínimos.",
+          "accept": "MCP distingue usuario de servicio y rechaza audiencia equivocada. Un token app-only no pasa como usuario. Consentimientos y requisitos del tenant quedan documentados.",
+          "id": "B04.3",
+          "status": "TODO",
+          "depends_on": [
+            "B04.2"
+          ]
+        },
+        {
+          "title": "Retirar la prueba y medir",
+          "mode": "AZURE",
+          "work": "Destruir con el state de la prueba, inventariar restos dentro y fuera del resource group y manejar Key Vault soft-delete sin purgas ajenas. Registrar duración, recursos y costes disponibles, indicando su posible retraso.",
+          "deliver": "Teardown inicial y reporte de viabilidad/coste.",
+          "accept": "No quedan workloads activos de la prueba ni se elimina el state con recursos pendientes. Si un recurso no se borra, hay instrucciones concretas para reintentar.",
+          "id": "B04.4",
+          "status": "TODO",
+          "depends_on": [
+            "B04.3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B05",
+      "title": "API y ejecución asíncrona resistente",
+      "depends_on": [
+        "B03"
+      ],
+      "goal": "Separar peticiones HTTP de ejecución y reanudar trabajos de manera fiable.",
+      "context": "El recorrido CLI de B03 es la referencia. El worker procesa segmentos, no duerme durante una espera humana. Guardar estado de negocio y outbox con transacciones propias; no asumir atomicidad con el saver de LangGraph.",
+      "paths": "apps/api/, apps/worker/, packages/platform/queue/, control migrations y tests/recovery/.",
+      "excluded": "Diseño visual, Graph y perfeccionamiento de prompts.",
+      "gate": "API devuelve un run, el worker avanza y se interrumpe; respuestas y eventos reanudan una vez, incluso tras fallos y mensajes duplicados.",
+      "tasks": [
+        {
+          "title": "Implementar API de runs y control",
+          "mode": "LOCAL",
+          "work": "Crear endpoints definidos, autorización de propietario con el proveedor de desarrollo, versionado optimista y persistencia de estado/eventos. Devolver 202 al crear trabajo. Separar peticiones de compra de conversaciones privadas.",
+          "deliver": "API, OpenAPI y repositorios de control.",
+          "accept": "No se bloquea HTTP hasta terminar el agente. Dos proyectos no ven runs ajenos; versiones obsoletas de respuestas/decisiones se rechazan.",
+          "id": "B05.1",
+          "status": "TODO",
+          "depends_on": [
+            "B03.4"
+          ]
+        },
+        {
+          "title": "Implementar outbox y consumidor de cola",
+          "mode": "LOCAL",
+          "work": "Persistir comandos y outbox; despachar a Storage Queue/Azurite y consumir con un único lease por hilo. Renovar invisibilidad mientras corre, confirmar después del checkpoint/estado duradero y finalizar al interrumpirse.",
+          "deliver": "Dispatcher, entrypoint de worker y mensaje ExecutionCommand versionado.",
+          "accept": "Duplicar mensajes no ejecuta dos segmentos simultáneos del mismo hilo. Caer entre guardar y encolar se recupera sin perder el run.",
+          "id": "B05.2",
+          "status": "TODO",
+          "depends_on": [
+            "B05.1"
+          ]
+        },
+        {
+          "title": "Conectar respuestas y decisiones humanas",
+          "mode": "LOCAL",
+          "work": "Implementar el puente de llamadas delegadas y validación de respuestas. API ejecuta la herramienta usando argumentos persistidos y guarda resultado confiable. Una decisión de compra de otro aprobador emite evento de dominio sin cambiar owner_id del run.",
+          "deliver": "Rutas de respuesta/decisión/llamada delegada y reconciliación.",
+          "accept": "Cerrar el cliente deja una espera persistida. Un usuario no puede inyectar un resultado MCP. El aprobador decide una compra sin obtener acceso general al chat del solicitante.",
+          "id": "B05.3",
+          "status": "TODO",
+          "depends_on": [
+            "B05.2"
+          ]
+        },
+        {
+          "title": "Probar fallos, reintentos y cancelación",
+          "mode": "LOCAL",
+          "work": "Implementar reintentos acotados con backoff, cola de fallidos de la aplicación, cancelación cooperativa y reconciliador de proyecciones. Inyectar caída antes/después de efectos, expiración de lease y doble clic.",
+          "deliver": "Pruebas de recuperación y guía de operación local.",
+          "accept": "Cada escenario termina o queda recuperable con causa visible. Se conserva un único efecto y una cancelación no inicia nuevas acciones; no se promete revertir una acción externa ya confirmada.",
+          "id": "B05.4",
+          "status": "TODO",
+          "depends_on": [
+            "B05.3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B06",
+      "title": "Autenticación y autorización reales",
+      "depends_on": [
+        "B04",
+        "B05"
+      ],
+      "goal": "Sustituir la identidad de desarrollo por Entra sin modificar las reglas de negocio.",
+      "context": "B04 ya probó los flujos; ahora se integran en API, worker y MCP reales. Recrear un entorno temporal con su IaC para las pruebas y retirarlo al terminar la sesión; no depender de recursos destruidos en B04. Las pruebas negativas importan tanto como el camino correcto. No basta con ocultar botones o herramientas.",
+      "paths": "packages/platform/identity/, apps/api/auth/, apps/mcp_server/auth/, infra identity modules y tests/security/.",
+      "excluded": "Multitenancy comercial, Graph y un almacén duradero de refresh tokens.",
+      "gate": "Usuario, aprobador y servicio tienen permisos distintos comprobados en Azure, y el perfil cloud rechaza configuración de desarrollo.",
+      "tasks": [
+        {
+          "title": "Integrar login y validación de tokens",
+          "mode": "LOCAL + AZURE",
+          "work": "Implementar authorization code/PKCE para el cliente, access tokens para API, validación criptográfica de issuer/audience/expiración y tenant admitido. Resolver memberships desde el servidor; proteger endpoints humanos.",
+          "deliver": "Autenticación real y configuración por entorno.",
+          "accept": "Tokens expirados, de otra audiencia o tenant no autorizado fallan. Un ID token no autoriza la API. No se guardan credenciales en eventos/checkpoints.",
+          "id": "B06.1",
+          "status": "TODO",
+          "depends_on": [
+            "B04.4",
+            "B05.4"
+          ]
+        },
+        {
+          "title": "Integrar la ruta de servicio",
+          "mode": "AZURE",
+          "work": "Asignar UAMIs por workload, app roles MCP y roles de datos. Restringir cada servicio a sus tablas/contenedores. El contexto del run/proyecto que recibe MCP es verificado y no una cabecera libre del modelo.",
+          "deliver": "Credenciales Azure, SQL grants y política app-only.",
+          "accept": "Worker no escribe aprobaciones ni ejecuta tools delegadas; MCP solo guarda en destinos autorizados. Se comprueba una llamada real por UAMI.",
+          "id": "B06.2",
+          "status": "TODO",
+          "depends_on": [
+            "B06.1"
+          ]
+        },
+        {
+          "title": "Integrar OBO y espera de autenticación",
+          "mode": "AZURE",
+          "work": "Adaptar el puente B05 a API→MCP OBO. No serializar bearer tokens. Si falta sesión/consentimiento, mantener la espera y guiar la reconexión. Reautorizar la acción al reanudar y conservar el propietario original.",
+          "deliver": "Flujo delegado y manejo de AUTH_REQUIRED.",
+          "accept": "Una acción delegada usa el usuario correcto; token ausente/expirado no activa fallback de servicio. Volver a autenticar permite continuar sin repetir efectos.",
+          "id": "B06.3",
+          "status": "TODO",
+          "depends_on": [
+            "B06.2"
+          ]
+        },
+        {
+          "title": "Cerrar la matriz de permisos",
+          "mode": "LOCAL + AZURE",
+          "work": "Probar requester, approver, usuario ajeno y workload. Intentar acceso cruzado, autoaprobación, replay, cambio de importe tras aprobar y ejecución directa de tool sin aprobación. Probar denegación al retirar membresía de negocio.",
+          "deliver": "Matriz de autorización y suite negativa reproducible.",
+          "accept": "Cero accesos indebidos en esos casos. Los límites de propagación de permisos externos se documentan; no se afirma revocación Azure instantánea.",
+          "id": "B06.4",
+          "status": "TODO",
+          "depends_on": [
+            "B06.3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B07",
+      "title": "Interfaz mínima para enseñar el proceso",
+      "depends_on": [
+        "B05"
+      ],
+      "goal": "Permitir que solicitante y aprobador completen la demo sin CLI.",
+      "context": "La UI representa los estados existentes y no inventa una segunda máquina de estados. Desarrollar inicialmente con identidad local, y conectar Entra mediante la interfaz de B06 antes de cerrar B08. Priorizar claridad de acciones sobre diseño decorativo.",
+      "paths": "apps/api/web/ o frontend acotado, clientes API y tests/ui/.",
+      "excluded": "Dashboard complejo, diseñador de workflows, SSR y notificaciones de pago.",
+      "gate": "Desde el navegador se crea una tarea, se responde, se revisa una compra, se consulta progreso y se descarga un resultado.",
+      "tasks": [
+        {
+          "title": "Crear navegación y vista de ejecución",
+          "mode": "LOCAL",
+          "work": "Implementar entrada, selector de proyecto, chat/petición y lista de runs. Mostrar plan y eventos del servidor mediante polling; conservar run_id en URL y permitir volver tras recargar.",
+          "deliver": "UI básica y cliente API tipado.",
+          "accept": "Una recarga recupera estado y no inicia otra tarea. Los errores de red se distinguen de una tarea fallida.",
+          "id": "B07.1",
+          "status": "TODO",
+          "depends_on": [
+            "B05.4"
+          ]
+        },
+        {
+          "title": "Renderizar preguntas y aprobaciones",
+          "mode": "LOCAL",
+          "work": "Mostrar formularios según schema y revisión de argumentos/destino/importe. Separar aprobación de herramienta de aprobación de compra. Añadir bandeja del aprobador sin exponer mensajes privados no necesarios.",
+          "deliver": "Pantallas de acciones pendientes y decisiones.",
+          "accept": "Doble clic no duplica la decisión; versión vieja muestra conflicto. Rechazar detiene la acción y el modelo no puede sustituir esa decisión.",
+          "id": "B07.2",
+          "status": "TODO",
+          "depends_on": [
+            "B07.1"
+          ]
+        },
+        {
+          "title": "Mostrar documentos, evidencias y bandeja demo",
+          "mode": "LOCAL",
+          "work": "Crear vista de ofertas, comparación, enlaces autorizados a evidencias, descarga y mensajes de proveedores simulados. Etiquetar datos sintéticos y distinguir simulación de envío real.",
+          "deliver": "UI del expediente de compra y llegada de respuesta preparada.",
+          "accept": "Se puede localizar de qué oferta salió un importe y completar la espera de proveedor. Ningún enlace expone un artefacto de otro proyecto.",
+          "id": "B07.3",
+          "status": "TODO",
+          "depends_on": [
+            "B07.2"
+          ]
+        },
+        {
+          "title": "Cerrar recorrido de navegador",
+          "mode": "LOCAL",
+          "work": "Ejecutar prueba UI del caso feliz y rechazo, reconexión, cancelación y estado WAITING_AUTH con proveedor de desarrollo. Asegurar accesibilidad básica de formularios y navegación por teclado. Preparar puntos de integración Entra.",
+          "deliver": "Test de navegador y guion de demo local.",
+          "accept": "Dos roles completan el proceso y las decisiones finales coinciden con PostgreSQL. No se declara login real probado hasta integrar B06/B08.",
+          "id": "B07.4",
+          "status": "TODO",
+          "depends_on": [
+            "B07.3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B08",
+      "title": "Demo Azure desplegable y eliminable",
+      "depends_on": [
+        "B06",
+        "B07"
+      ],
+      "goal": "Automatizar el ciclo completo con los servicios reales y el dataset.",
+      "context": "Reutilizar Terraform de B04 y la aplicación de B05–B07. IaC, migraciones y seed son pasos distintos coordinados por scripts. El state local es el perfil por defecto para no conservar infraestructura entre demos.",
+      "paths": "infra/environments/demo/, scripts/demo_*, Makefile, CI build y tests/deployment/.",
+      "excluded": "Backend remoto obligatorio, entornos siempre encendidos y restaurar sesiones antiguas por defecto.",
+      "gate": "Dos ciclos desde cero de demo-up, prueba funcional y demo-down finalizan con los mismos fixtures y sin workloads activos propios.",
+      "tasks": [
+        {
+          "title": "Completar infraestructura de aplicación",
+          "mode": "LOCAL + AZURE",
+          "work": "Modelar API/web, MCP interno, Job/cola, PostgreSQL, Storage, KV, UAMIs, logs acotados y modelo configurable. Desplegar imágenes por digest. Tratar endpoints y redirect URIs dinámicos sin dependencias circulares.",
+          "deliver": "Terraform completo, outputs mínimos y run manifest por entorno.",
+          "accept": "El plan no incluye servicios fuera del presupuesto/alcance y se despliega la app real. Readiness y diagnósticos explican un fallo de configuración.",
+          "id": "B08.1",
+          "status": "TODO",
+          "depends_on": [
+            "B06.4",
+            "B07.4"
+          ]
+        },
+        {
+          "title": "Orquestar demo-up y seed cloud",
+          "mode": "AZURE",
+          "work": "Crear preflight, apply, inicialización SQL con identidad separada, migraciones del SDK/negocio, seed y smoke. Aplicar nuevos principal IDs y URLs; reintentar propagación con límites. No dejar privilegios de inicialización en runtime.",
+          "deliver": "make demo-up y manifiesto de versiones/identidades sin secretos.",
+          "accept": "Desde vacío hay login, datos y recorrido disponible. Seed doble no duplica, y un fallo deja state y pasos de recuperación claros.",
+          "id": "B08.2",
+          "status": "TODO",
+          "depends_on": [
+            "B08.1"
+          ]
+        },
+        {
+          "title": "Implementar reset, export y retirada",
+          "mode": "LOCAL + AZURE",
+          "work": "Añadir demo-reset acotado y export de resultados seleccionados. demo-down cierra admisión, drena/cancela, destruye por state y verifica Azure/Entra del proyecto. Manejar KV retenido/nombre único. No borrar state si quedan recursos.",
+          "deliver": "Comandos de ciclo de vida y verificador de residuos.",
+          "accept": "Tras teardown no quedan workloads del entorno; objetos retenidos/fallos se enumeran. Reset de un entorno ajeno se rechaza y export no filtra secretos.",
+          "id": "B08.3",
+          "status": "TODO",
+          "depends_on": [
+            "B08.2"
+          ]
+        },
+        {
+          "title": "Repetir el ciclo y registrar coste",
+          "mode": "AZURE",
+          "work": "Ejecutar dos despliegues completos con environment_id distinto; comparar hashes, conteos, roles y resultados deterministas. Registrar tiempos y consumo disponible, diferenciando retraso de facturación y coste estimado.",
+          "deliver": "Informe de reproducibilidad y presupuesto por demo medido.",
+          "accept": "La segunda demo funciona con identidades nuevas; no depende de restos de la primera. Se conserva una lista explícita de recursos y costes residuales si los hay.",
+          "id": "B08.4",
+          "status": "TODO",
+          "depends_on": [
+            "B08.3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B09",
+      "title": "Skills, memoria y subagentes útiles",
+      "depends_on": [
+        "B03",
+        "B05"
+      ],
+      "goal": "Ampliar capacidades después de tener un recorrido y una persistencia fiables.",
+      "context": "Ya existe un agente principal y una skill. Mantener iguales políticas MCP, identidad e idempotencia. Memoria no es autorización y una skill nueva no modifica permisos.",
+      "paths": "packages/agents/, skills/, memoria y evals/agent_variants/.",
+      "excluded": "Autopromoción de skills, subagentes con UAMIs ficticiamente aisladas y registry dinámico general.",
+      "gate": "Dos especialistas aportan resultados verificables y la memoria aislada ayuda a una nueva tarea sin contaminar otros proyectos.",
+      "tasks": [
+        {
+          "title": "Publicar skills por responsabilidad",
+          "mode": "LOCAL + LLM",
+          "work": "Separar comparación técnica, condiciones comerciales y preparación de solicitud en SKILL.md con referencias pequeñas. Publicarlas de solo lectura y registrar hashes/versiones. No cargar todas las instrucciones completas de golpe.",
+          "deliver": "Skills v1 y tests de selección/carga.",
+          "accept": "Cada escenario activa procedimientos pertinentes; una instrucción dentro de una oferta no modifica la skill ni los permisos.",
+          "id": "B09.1",
+          "status": "TODO",
+          "depends_on": [
+            "B03.4",
+            "B05.4"
+          ]
+        },
+        {
+          "title": "Introducir dos subagentes",
+          "mode": "LOCAL + LLM",
+          "work": "Añadir analista de ofertas y redactor con herramientas y contexto mínimos. El principal coordina y sintetiza; no delegar por delegar. Limitar profundidad/concurrencia y medir llamadas/coste respecto al agente único.",
+          "deliver": "Definiciones de subagentes y comparación con baseline.",
+          "accept": "Las evidencias llegan al principal y los especialistas no publican/aprueban fuera de alcance. Se documenta si la delegación mejora o empeora la tarea.",
+          "id": "B09.2",
+          "status": "TODO",
+          "depends_on": [
+            "B09.1"
+          ]
+        },
+        {
+          "title": "Gestionar memoria explícita",
+          "mode": "LOCAL",
+          "work": "Persistir preferencias consentidas del usuario y conocimiento con procedencia/fecha. Aplicar namespace y operaciones de ver/editar/borrar. No convertir automáticamente una decisión puntual en regla global.",
+          "deliver": "Memoria de preferencias y políticas de escritura/retención.",
+          "accept": "Una preferencia aparece en otro hilo del mismo ámbito y no en el de otro usuario. Borrar memoria impide su uso posterior.",
+          "id": "B09.3",
+          "status": "TODO",
+          "depends_on": [
+            "B09.2"
+          ]
+        },
+        {
+          "title": "Proponer cambios de skill sin publicarlos",
+          "mode": "LOCAL + LLM",
+          "work": "A partir de feedback, generar candidato de SKILL.md y diff con motivación, casos afectados y versión base. Guardarlo separado; no permitir editar el bundle activo. Preparar contrato de promoción que consumirá B10.",
+          "deliver": "Candidatos versionados y revisión humana.",
+          "accept": "El runtime sigue usando la versión aprobada. Cambiar una candidata no altera ejecuciones pendientes ni políticas MCP.",
+          "id": "B09.4",
+          "status": "TODO",
+          "depends_on": [
+            "B09.3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B10",
+      "title": "Evaluaciones, Langfuse y mejora controlada",
+      "depends_on": [
+        "B08",
+        "B09"
+      ],
+      "goal": "Demostrar con resultados reproducibles qué funciona y qué mejora.",
+      "context": "Los eventos y diez casos existen desde B01/B03; esta fase los amplía. El dataset reservado no se utiliza para redactar la skill candidata. Seguridad y cálculos se validan con código, no con un juez LLM.",
+      "paths": "evals/, packages/platform/telemetry/, CI eval manual, reports y tests/security,recovery/.",
+      "excluded": "Langfuse autoalojado, evaluación cara por cada commit y publicación automática por una sola métrica.",
+      "gate": "Existe un reporte de 30–50 casos, trazas correlacionadas y comparación baseline/candidata con decisión de promoción justificada.",
+      "tasks": [
+        {
+          "title": "Conectar observabilidad completa",
+          "mode": "LOCAL + LLM + AZURE",
+          "work": "Integrar Langfuse según versiones fijadas y correlacionar API, segmentos, subagentes y tools. Registrar costes configurados, versión y tipo de identidad; redactar secretos/contenido sensible. Vaciar spans al terminar Jobs.",
+          "deliver": "Tracing configurable, métricas y pruebas de redacción.",
+          "accept": "Una ejecución con pausa y reanudación se sigue por IDs; no falta el final del Job. La caída del exportador no ejecuta acciones duplicadas ni expone datos.",
+          "id": "B10.1",
+          "status": "TODO",
+          "depends_on": [
+            "B08.4",
+            "B09.4"
+          ]
+        },
+        {
+          "title": "Construir harness de evaluación",
+          "mode": "LOCAL + LLM",
+          "work": "Ampliar a 30–50 casos separados en dominio, permisos, recuperación y calidad agéntica. Congelar fixtures/reloj y ejecutar varios intentos en casos variables. Registrar denominadores, versión y costes, incluidos fallos.",
+          "deliver": "Runner y reporte JSON/Markdown con criterios explícitos.",
+          "accept": "Totales y autorización se evalúan determinísticamente. El informe distingue mocks, modelo real y Azure; no omite ejecuciones fallidas del porcentaje.",
+          "id": "B10.2",
+          "status": "TODO",
+          "depends_on": [
+            "B10.1"
+          ]
+        },
+        {
+          "title": "Evaluar y promover una skill",
+          "mode": "LOCAL + LLM",
+          "work": "Comparar v1 y candidata con misma configuración y casos de validación; reservar holdout. Revisar calidad, regresiones y coste. Promoción por mantenedor mediante commit/release y rollback; conservar bundle anterior para runs pendientes.",
+          "deliver": "Experimento, decisión y proceso de publicación de skills.",
+          "accept": "Solo se afirma mejora si las métricas la apoyan. Una regresión de autorización impide promoción; volver a la versión anterior está probado.",
+          "id": "B10.3",
+          "status": "TODO",
+          "depends_on": [
+            "B10.2"
+          ]
+        },
+        {
+          "title": "Cerrar fiabilidad y límites de gasto",
+          "mode": "LOCAL + AZURE",
+          "work": "Ejecutar matriz final de fallos: mensajes duplicados, contenedor terminado, token expirado, proveedor lento, aprobación alterada y presupuesto agotado. Verificar quotas, cola fallida, cancelación y recuperación documentada.",
+          "deliver": "Informe de aceptación técnica y runbooks breves.",
+          "accept": "Cero efectos no autorizados en la batería y costes/iteraciones limitados. Los fallos se hacen visibles; no hay loops silenciosos ni promesas de exactly-once.",
+          "id": "B10.4",
+          "status": "TODO",
+          "depends_on": [
+            "B10.3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B11",
+      "title": "Entrega del portfolio y reproducción",
+      "depends_on": [
+        "B10"
+      ],
+      "goal": "Convertir el trabajo en una demostración que otra persona pueda entender y reproducir.",
+      "context": "El código y resultados existen; este bloque documenta hechos comprobados. La demo pública puede ser vídeo y modo local, evitando una suscripción encendida permanentemente.",
+      "paths": "README, docs/, demo scripts, releases y workflow CI.",
+      "excluded": "Métricas inventadas, incorporar funciones nuevas y mantener Azure siempre disponible.",
+      "gate": "Un checkout limpio y una persona que no desarrolló el último bloque pueden reproducir el caso y su retirada siguiendo la documentación.",
+      "tasks": [
+        {
+          "title": "Redactar documentación y ADRs finales",
+          "mode": "LOCAL",
+          "work": "Explicar problema, arquitectura, contratos, permisos, coste observado y límites. Documentar local/demo-up/demo-down, prerequisitos y troubleshooting. Conservar la diferencia entre seed limpio y restauración de sesión.",
+          "deliver": "README y ADRs actualizados a lo implementado.",
+          "accept": "Los comandos documentados existen y funcionan; versiones y capturas coinciden con el código entregado.",
+          "id": "B11.1",
+          "status": "TODO",
+          "depends_on": [
+            "B10.4"
+          ]
+        },
+        {
+          "title": "Preparar demo y evidencia",
+          "mode": "LOCAL + AZURE",
+          "work": "Crear guion breve: ofertas, dato ausente, pausa, reinicio, aprobación, solicitud, denegación y skill. Grabar datos sintéticos y ocultar IDs/secretos no necesarios. Adjuntar reporte de evaluación y segundo ciclo de despliegue.",
+          "deliver": "Vídeo/capturas y evidencias publicables.",
+          "accept": "Queda visible qué es real y qué es fixture. No se presenta una bandeja simulada como envío Outlook ni una prueba local como autorización Azure.",
+          "id": "B11.2",
+          "status": "TODO",
+          "depends_on": [
+            "B11.1"
+          ]
+        },
+        {
+          "title": "Publicar paquete reproducible",
+          "mode": "LOCAL",
+          "work": "Preparar release de código, imágenes por digest, dataset con checksums y ejemplo de configuración. Revisar licencia con el mantenedor y escaneo de secretos. Configurar CI económica y tareas con modelos solo bajo ejecución controlada.",
+          "deliver": "Release y checklist de reproducibilidad, sin states ni dumps privados.",
+          "accept": "Una máquina limpia instala y carga el dataset; el paquete no contiene credenciales ni depende de un directorio local del autor.",
+          "id": "B11.3",
+          "status": "TODO",
+          "depends_on": [
+            "B11.2"
+          ]
+        },
+        {
+          "title": "Realizar revisión de cierre",
+          "mode": "LOCAL + AZURE",
+          "work": "Revisar criterios de todos los bloques y handoffs. Ejecutar el recorrido final y comprobar retirada. Abrir issues de limitaciones reales y separar ampliaciones opcionales de requisitos incumplidos.",
+          "deliver": "Matriz requisito→implementación→evidencia y backlog posterior.",
+          "accept": "Cada capacidad prometida tiene prueba o limitación explícita. No quedan recursos facturables propios de la última demo sin identificar.",
+          "id": "B11.4",
+          "status": "TODO",
+          "depends_on": [
+            "B11.3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B12",
+      "title": "Extensión opcional de Microsoft Graph",
+      "depends_on": [
+        "B11"
+      ],
+      "goal": "Añadir correo/documentos externos si la cuenta disponible permite hacerlo sin coste desproporcionado.",
+      "context": "El producto principal ya funciona con datos sintéticos y Entra. El tipo de cuenta y licencias determinan las APIs y el flujo OAuth; no se asume que una cuenta personal permite la misma cadena OBO de un tenant de trabajo.",
+      "paths": "packages/platform/graph/, herramientas MCP opcionales, configuración Entra y tests/integration_graph/.",
+      "excluded": "Licencias contratadas automáticamente, pagos, acceso amplio al tenant y datos reales incluidos en Git.",
+      "gate": "La integración real añade valor y supera pruebas de permiso y aprobación, o queda desactivada con la razón documentada sin bloquear el proyecto.",
+      "tasks": [
+        {
+          "title": "Verificar cuenta, APIs y consentimiento",
+          "mode": "LOCAL",
+          "work": "Identificar cuenta personal o de trabajo, APIs requeridas, scopes mínimos y permisos administrativos disponibles. Hacer ADR de flujo OAuth y presupuesto. No comprar una suscripción para salvar una incompatibilidad sin decisión del usuario.",
+          "deliver": "Matriz de capacidades y prerrequisitos de Graph.",
+          "accept": "Las operaciones elegidas tienen soporte confirmado para esa cuenta; las no disponibles se excluyen explícitamente.",
+          "id": "B12.1",
+          "status": "TODO",
+          "depends_on": [
+            "B11.4"
+          ]
+        },
+        {
+          "title": "Integrar lectura de ofertas",
+          "mode": "LLM + EXTERNO",
+          "work": "Añadir búsqueda/lectura acotada de correo o OneDrive y descarga con identidad del usuario. Reutilizar ingestión y evidencias B02; limitar tamaño, tipos y ámbito. Mantener perfil demo independiente.",
+          "deliver": "Tools Graph de lectura y prueba con datos de ensayo en una cuenta autorizada.",
+          "accept": "Solo se recupera contenido al que el usuario tiene acceso. Expiración/consentimiento pendiente no produce fallback app-only.",
+          "id": "B12.2",
+          "status": "TODO",
+          "depends_on": [
+            "B12.1"
+          ]
+        },
+        {
+          "title": "Integrar envío aprobado y respuestas",
+          "mode": "EXTERNO",
+          "work": "Crear borrador/revisión y envío de aclaraciones, con destinatario y contenido exactos. Registrar identificadores del proveedor y diseñar reconciliación para timeouts de resultado incierto; no reenviar a ciegas. Incluir respuesta mediante polling bajo demanda antes de webhooks.",
+          "deliver": "Ciclo de aclaración real y recuperación de resultados inciertos.",
+          "accept": "Se envía una sola vez cuando puede verificarse; ante incertidumbre se pausa para reconciliar. Las respuestas se vinculan al expediente correcto y un rechazo no envía nada.",
+          "id": "B12.3",
+          "status": "TODO",
+          "depends_on": [
+            "B12.2"
+          ]
+        },
+        {
+          "title": "Evaluar y retirar permisos de prueba",
+          "mode": "EXTERNO",
+          "work": "Repetir casos de autorización, token expirado y prompt injection con documentos externos de ensayo. Documentar consentimiento y retirada de registros/artefactos creados, sin borrar contenido ajeno.",
+          "deliver": "Reporte y guía de activación/desactivación del perfil Graph.",
+          "accept": "El perfil básico sigue funcionando sin Graph; desactivar integración no impide cargar el dataset ni retirar la demo Azure.",
+          "id": "B12.4",
+          "status": "TODO",
+          "depends_on": [
+            "B12.3"
+          ]
+        }
+      ]
+    }
+  ]
+}
