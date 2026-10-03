@@ -1,6 +1,6 @@
 # Orden de desarrollo y mapa de bloques
 
-El paquete contiene 12 bloques principales (B00–B11), con cuatro subbloques cada uno: 48 encargos. B12 añade cuatro subbloques opcionales de Microsoft Graph. Todo está pendiente; esto es una planificación, no evidencia de código implementado.
+El backlog contiene 12 bloques principales (B00–B11), con cuatro subbloques cada uno: 48 encargos. B12 añade cuatro subbloques opcionales de Microsoft Graph. El estado de cada encargo se mantiene en `docs/tasks/index.json`; completar documentación o una tarea no demuestra que el código de bloques posteriores esté implementado.
 
 Ruta recomendada: B00, B01, B02, B03, B04, B05, B06, B07, B08, B09, B10 y B11. B12 solo después de cerrar el núcleo. Las dependencias mínimas permiten adelantar trabajo local si Azure está bloqueado.
 

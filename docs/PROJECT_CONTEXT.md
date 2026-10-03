@@ -1,6 +1,6 @@
 # Contexto compartido: Procurement Agent Workbench
 
-Fecha: 1 de octubre de 2026. Documento de desarrollo, no implementación existente. El repo de destino todavía no se ha conectado ni modificado.
+Fecha de revisión: 3 de octubre de 2026. Este documento fija el contexto de producto y las decisiones base; no implica que las capacidades planeadas ya estén implementadas. El estado de trabajo está en `docs/tasks/index.json`.
 
 ## Producto
 
@@ -63,3 +63,36 @@ Tests locales usan modelos simulados. Las pruebas con modelo real tienen presupu
 | tests/, evals/ | Pruebas y evaluación |
 
 Estas rutas se materializan en B00; no se presupone que ya existan. Evitar varias implementaciones del mismo contrato en servicios distintos.
+
+## Mapa de rutas previsto
+
+El backlog se ejecuta en orden B00–B11; B12 es opcional. Las rutas siguientes son destinos de implementación, no evidencia de código ya creado:
+
+| Ruta | Responsabilidad |
+|---|---|
+| `apps/api/` | API, identidad, endpoints humanos y web mínima |
+| `apps/worker/` | Cola, leases, segmentos y reanudación |
+| `apps/mcp_server/` | Transporte MCP, autenticación de llamadas y autorización de herramientas |
+| `packages/contracts/` | Modelos Pydantic, enums y contratos compartidos |
+| `packages/domain/` | Reglas, cálculos deterministas y decisiones de compras |
+| `packages/agents/` | Harness Deep Agents/LangGraph, adaptadores de herramientas, skills y subagentes |
+| `packages/platform/` | Adaptadores de PostgreSQL, almacenamiento, cola, identidad y telemetría |
+| `migrations/` | Migraciones de negocio, control y auditoría; inicialización de roles |
+| `demo/datasets/v1/` | Dataset sintético, manifiesto y generadores reproducibles |
+| `skills/` | Procedimientos aprobados con revisión de cambios |
+| `infra/` | Módulos Terraform reutilizables y perfil de demo Azure efímera |
+| `scripts/` | Desarrollo, migración, seed, preflight, deploy, export y teardown |
+| `tests/`, `evals/` | Tests locales, integraciones y evaluaciones separados por entorno |
+| `docs/adr/` | Decisiones arquitectónicas y su estado |
+| `docs/tasks/`, `docs/handoffs/` | Backlog canónico y contexto transferible por subbloque |
+
+## Decisiones y cuestiones abiertas
+
+Las decisiones acordadas se registran en `docs/adr/README.md`. Aún requieren validación o elección durante los subbloques que les corresponden:
+
+- versiones compatibles y fijadas de Python, Deep Agents, LangGraph, MCP y los paquetes de saver/store PostgreSQL (B00.2–B00.4);
+- detalle de esquemas PostgreSQL, roles SQL, migraciones y estrategia de reconciliación entre transacciones propias y checkpoints (B00.3, B01 y B03);
+- región, SKU/cuota, nombres y límites concretos para la demo Azure, y si algún experimento de red privada cabe en el presupuesto (B04/B08);
+- disponibilidad de tenant, usuarios de prueba, permisos Entra y suscripción Azure para validar identidad real; no hay credenciales ni recursos implícitos en esta planificación (B04/B06);
+- proveedor/modelo LLM y presupuesto de llamadas para las pruebas reales; los tests locales usarán modelos simulados (B00.4/B03/B10);
+- cuenta, permisos y factibilidad OBO de Microsoft Graph. Graph es opcional y no bloquea el perfil base (B12).

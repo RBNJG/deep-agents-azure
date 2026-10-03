@@ -23,7 +23,7 @@
           "deliver": "Documentación integrada y mapa de rutas; AGENTS.md conciliado.",
           "accept": "Otra sesión puede localizar stack, alcance y próximo subbloque sin consultar el chat. No se sobrescriben instrucciones previas.",
           "id": "B00.1",
-          "status": "TODO",
+          "status": "READY_FOR_REVIEW",
           "depends_on": []
         },
         {
