@@ -36,6 +36,11 @@ Para reducir gasto, preparar primero el código y las comprobaciones locales de 
 
 ## Uso de varios agentes
 
+Para implementaciones, aplicar el [protocolo de agentes](DEVELOPMENT_AGENTS.md):
+razonamiento y revisión con `gpt-6.1-sol`/`high`, código con
+`gpt-6-luna`/`medium`, siempre sobre artefactos OpenSpec. AGENTS.md pide
+explícitamente esta delegación; no hace falta repetirla en cada encargo.
+
 Orden secuencial por defecto. Con contratos estables, B04 y B05 admiten trabajo independiente; B07 y B09 también, después de B05. Para trabajo paralelo usar ramas/worktrees, un responsable de integración y propiedad de archivos. Evitar cambios simultáneos de contratos, lockfile o migraciones sin coordinación. No juntar ramas basándose solo en que sus tests aislados pasan.
 
 ## Coste y entornos

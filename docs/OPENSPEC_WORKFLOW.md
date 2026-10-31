@@ -46,6 +46,11 @@ no demuestra que sus dependencias estén disponibles.
 
 ## Uso desde Copilot con Codex
 
+Las implementaciones siguen [el protocolo de agentes](DEVELOPMENT_AGENTS.md)
+y los modelos/esfuerzos de [AGENTS.md](../AGENTS.md). El coordinador selecciona
+cambio y subbloque; planner prepara decisiones, worker aplica y reviewer verifica.
+Los límites del cliente y la activación se explican en esa guía.
+
 En el **chat**, indicar por ejemplo:
 
 ```text
@@ -71,3 +76,13 @@ Versión de generación y validación inicial: OpenSpec 1.16.0. La configuració
 Copilot mantiene `cloudAgent: false`. Versionar configuración, cambios y skills
 junto al proyecto; no ejecutar `init` de nuevo sobre el repositorio configurado.
 Archivar solo tras completar y comprobar la puerta de salida del bloque.
+
+## Cambios de herramientas de desarrollo
+
+Los encargos transversales que no implementan B00–B12 usan una ficha DEV y
+`tooling_tasks` en el índice. DEV.1 se sigue en
+[dev-agent-orchestration](../openspec/changes/dev-agent-orchestration/).
+Un cambio exclusivo de configuración/documentación puede declarar
+`skip_specs: true` sin inventar requisitos de producto. Conserva propuesta,
+diseño, tareas verificables y handoff; esto no exime a cambios de comportamiento
+del producto de escribir sus especificaciones.

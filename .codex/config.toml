@@ -1,0 +1,11 @@
+# Coordinación y decisiones: modelo capaz, esfuerzo high.
+model = "gpt-6.1-sol"
+model_reasoning_effort = "high"
+
+[agents]
+enabled = true
+# Límite de subagentes, sin contar el coordinador. Secuencial por defecto.
+max_concurrent_threads_per_session = 2
+# Roles sin especialización no deben abaratar razonamiento por herencia.
+default_subagent_model = "gpt-6.1-sol"
+default_subagent_reasoning_effort = "high"
