@@ -1,0 +1,41 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "PAW: check",
+      "type": "shell",
+      "command": "${command:python.interpreterPath}",
+      "args": ["-m", "uv", "run", "--locked", "--", "python", "-m", "scripts.check"],
+      "group": {"kind": "test", "isDefault": true},
+      "problemMatcher": []
+    },
+    {
+      "label": "PAW: smoke HTTP",
+      "type": "shell",
+      "command": "${command:python.interpreterPath}",
+      "args": ["-m", "uv", "run", "--locked", "--", "python", "-m", "scripts.smoke_services"],
+      "problemMatcher": []
+    },
+    {
+      "label": "PAW: API",
+      "type": "shell",
+      "command": "${command:python.interpreterPath}",
+      "args": ["-m", "uv", "run", "--locked", "--", "paw-api"],
+      "problemMatcher": []
+    },
+    {
+      "label": "PAW: MCP probes",
+      "type": "shell",
+      "command": "${command:python.interpreterPath}",
+      "args": ["-m", "uv", "run", "--locked", "--", "paw-mcp"],
+      "problemMatcher": []
+    },
+    {
+      "label": "PAW: worker probes",
+      "type": "shell",
+      "command": "${command:python.interpreterPath}",
+      "args": ["-m", "uv", "run", "--locked", "--", "paw-worker"],
+      "problemMatcher": []
+    }
+  ]
+}

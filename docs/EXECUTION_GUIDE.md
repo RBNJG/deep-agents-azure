@@ -49,3 +49,10 @@ No modificar presupuestos, consentimientos o permisos para sortear un error. Inv
 El siguiente agente recibe contexto compartido, subbloque actual y handoff anterior; no necesita toda la conversación. El handoff informa de hechos del repositorio, no de planes imaginados. Las decisiones nuevas se añaden a ADR y los cambios de contrato se reflejan en CONTRACTS.md.
 
 Crear primero B00.1. Al terminar cada bloque, ejecutar su puerta de salida antes de avanzar por la ruta recomendada. Las fuentes del SDK se verifican al fijar versiones; no copiar ejemplos de versiones distintas sin comprobarlos.
+
+## Seguimiento con OpenSpec
+
+El [flujo OpenSpec](OPENSPEC_WORKFLOW.md) conserva el mapa B00–B12 y la relación
+entre artefactos, subbloques e índice. Crear un cambio por bloque y aplicar solo
+el subbloque encargado. Las casillas no sustituyen los estados ni los handoffs:
+un bloque con comprobaciones pendientes no se archiva como terminado.

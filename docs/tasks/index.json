@@ -33,7 +33,7 @@
           "deliver": "Proyecto instalable, comandos de desarrollo, .env.example sin secretos y CI local básica.",
           "accept": "Instalación reproducible y health endpoints comprobados; configuración requerida ausente produce error claro, no valores inventados.",
           "id": "B00.2",
-          "status": "TODO",
+          "status": "READY_FOR_REVIEW",
           "depends_on": [
             "B00.1"
           ]

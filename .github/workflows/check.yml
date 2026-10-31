@@ -1,0 +1,39 @@
+name: Local checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.6"
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run --locked -- python -m scripts.check
+      - run: uv run --locked -- python -m scripts.smoke_services
+      - run: uv build
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: cp .env.example .env
+      - run: docker compose config --quiet
+      - run: docker compose up --build --wait --wait-timeout 120
+      - run: |
+          for port in 8000 8001 8002; do
+            curl --fail "http://127.0.0.1:${port}/health"
+            curl --fail "http://127.0.0.1:${port}/ready"
+          done
+      - if: always()
+        run: docker compose down --remove-orphans

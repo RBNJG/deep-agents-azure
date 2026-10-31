@@ -150,6 +150,8 @@ activemq-data/
 # Environments
 .env
 .envrc
+.env.*
+!.env.example
 .venv
 env/
 venv/
@@ -216,3 +218,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Private Terraform state and provider cache
+.terraform/
+*.tfstate
+*.tfstate.*
