@@ -1,5 +1,19 @@
 # Handoff DEV.1 — Agentes de desarrollo con OpenSpec
 
+## Cierre — 2026-10-31
+
+- Estado vigente: **DONE**. El mantenedor acepta la entrega mediante su merge a `dev`,
+  confirmado como criterio de cierre en la conciliación del seguimiento.
+- Evidencia: [PR #4](https://github.com/RBNJG/deep-agents-azure/pull/4),
+  merge `4499738`, presente en el historial local de `dev`.
+- Se conservan las validaciones y limitaciones de la entrega original, incluida
+  la carga automática de roles aún no comprobada. La aceptación cubre la configuración
+  y documentación entregadas; no acredita inferencias nuevas ni archiva el cambio.
+- La revisión independiente ya consta en el registro original. Las menciones
+  siguientes a aceptación pendiente describen el momento anterior al merge.
+
+## Registro original de entrega
+
 - ID y título: DEV.1 — Configurar agentes de desarrollo con OpenSpec.
 - Commit/PR y fecha: rama `codex/dev-agent-orchestration`; commit que incorpora
   este handoff, sin PR; 2026-10-31.

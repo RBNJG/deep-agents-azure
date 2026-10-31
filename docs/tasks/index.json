@@ -10,7 +10,7 @@
       "id": "DEV.1",
       "title": "Configurar agentes de desarrollo con OpenSpec",
       "mode": "LOCAL",
-      "status": "READY_FOR_REVIEW",
+      "status": "DONE",
       "depends_on": [],
       "change": "dev-agent-orchestration",
       "source": "docs/tasks/DEV.md",
@@ -35,7 +35,7 @@
           "deliver": "Documentación integrada y mapa de rutas; AGENTS.md conciliado.",
           "accept": "Otra sesión puede localizar stack, alcance y próximo subbloque sin consultar el chat. No se sobrescriben instrucciones previas.",
           "id": "B00.1",
-          "status": "READY_FOR_REVIEW",
+          "status": "DONE",
           "depends_on": []
         },
         {
@@ -45,7 +45,7 @@
           "deliver": "Proyecto instalable, comandos de desarrollo, .env.example sin secretos y CI local básica.",
           "accept": "Instalación reproducible y health endpoints comprobados; configuración requerida ausente produce error claro, no valores inventados.",
           "id": "B00.2",
-          "status": "READY_FOR_REVIEW",
+          "status": "DONE",
           "depends_on": [
             "B00.1"
           ]
@@ -57,7 +57,7 @@
           "deliver": "packages/contracts/, schemas exportados y fixtures de contrato.",
           "accept": "Serialización/deserialización conserva Decimal y versiones; rechaza campos inválidos. Ningún schema expuesto al LLM permite elegir identidad efectiva.",
           "id": "B00.3",
-          "status": "READY_FOR_REVIEW",
+          "status": "DONE",
           "depends_on": [
             "B00.2"
           ]
