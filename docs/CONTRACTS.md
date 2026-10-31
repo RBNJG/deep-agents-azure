@@ -60,3 +60,32 @@ Errores mínimos: VALIDATION_ERROR, FORBIDDEN, NOT_FOUND, VERSION_CONFLICT, APPR
 ## Versiones y seguridad de desarrollo
 
 Guardar commit, image_digest, model_config_hash, skill_set_version, policy_version, dataset_version y schema_version. Aplicar límites de tamaño, timeouts, pasos y concurrencia. La configuración cloud rechaza cualquier proveedor de identidad de desarrollo. Ni tests ni fixtures incluyen credenciales reales.
+
+## Representación implementada en B00.3
+
+Los modelos compartidos están en `packages/contracts/models.py`; los schemas JSON
+versionados se regeneran con `python -m scripts.export_contract_schemas`. Los
+objetos rechazan campos extra, versiones menores que 1 y errores de enumeración.
+`Money` usa EUR, importe no negativo y salida decimal en string; rechaza floats
+binarios. Transporte desconocido se representa mediante `null`. `EvidenceRef`
+exige exactamente página o celda. Los validadores de Python también comprueban
+reglas entre campos que JSON Schema no expresa necesariamente.
+
+`ActionApproval` y `PurchaseDecision` son contratos distintos y exigen un actor
+de tipo usuario; esto no verifica su identidad, rol ni permisos. Esa verificación,
+la separación de funciones, el consumo idempotente y la reautorización siguen
+siendo responsabilidades de los servicios posteriores. Los schemas de entrada
+provisionales del catálogo de herramientas no contienen identidad ni credenciales;
+no implementan ni publican el transporte MCP. El servidor deberá determinar y
+comprobar proyecto y contexto efectivo, incluso si recibe un identificador.
+
+La canonicalización v1 acepta únicamente objetos/listas JSON, strings, enteros,
+booleanos y null; rechaza floats, claves no string y objetos Python. Serializar
+previamente los modelos con `model_dump(mode="json")`, con importes como strings.
+Se ordenan las claves, se conserva el orden de listas y los strings y se codifica
+UTF-8 sin espacios; SHA-256 se calcula sobre esos bytes. Distintas representaciones
+textuales decimales, como `1.0` y `1.00`, producen hashes distintos: el productor
+debe fijar su representación antes de crear o verificar una aprobación. Esta regla
+no supone normalización Unicode ni implementa por sí sola el diario idempotente.
+El error Pydantic se traduce a `VALIDATION_ERROR` en el transporte futuro; el
+contrato `ContractError` define los códigos, no su mapeo HTTP/MCP.

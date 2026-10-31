@@ -1,7 +1,7 @@
 # Tasks
 
-Encargo vigente: **solo B00.2**. B00.1 aporta la entrega documental ya integrada;
-su índice conserva `READY_FOR_REVIEW`. B00.3 y B00.4 no se implementan en este encargo.
+Encargo vigente: **solo B00.3**. B00.1 y B00.2 están integrados y pendientes de revisión;
+B00.4 no se implementa en este encargo.
 Las casillas acreditan su descripción, no la aceptación final del bloque.
 
 ## 1. B00.1 — Integrar contexto y decisiones (LOCAL, sin dependencias)
@@ -19,9 +19,9 @@ Las casillas acreditan su descripción, no la aceptación final del bloque.
 
 ## 3. B00.3 — Contratos v0 (LOCAL, depende de B00.2)
 
-- [ ] 3.1 Materializar modelos/enums compartidos de docs/CONTRACTS.md, sin redefinirlos por servicio; exportar schemas y fixtures y probar rechazo de entradas inválidas y round-trip de Decimal/versiones.
-- [ ] 3.2 Implementar canonicalización/hashes y errores estables; probar equivalencia por orden de claves y diferencias materiales, y verificar que schemas LLM no permiten identidad efectiva.
-- [ ] 3.3 Documentar contratos y separar ActionApproval/PurchaseDecision; ejecutar sus comprobaciones, escribir handoff B00.3 y actualizar su estado en el índice.
+- [x] 3.1 Materializar modelos/enums compartidos de docs/CONTRACTS.md, sin redefinirlos por servicio; exportar schemas y fixtures y probar rechazo de entradas inválidas y round-trip de Decimal/versiones.
+- [x] 3.2 Implementar canonicalización/hashes y errores estables; probar equivalencia por orden de claves y diferencias materiales, y verificar que schemas LLM no permiten identidad efectiva.
+- [x] 3.3 Documentar contratos y separar ActionApproval/PurchaseDecision; ejecutar sus comprobaciones, escribir handoff B00.3 y actualizar su estado en el índice.
 
 ## 4. B00.4 — Compatibilidad de SDKs (LOCAL, depende de B00.3)
 

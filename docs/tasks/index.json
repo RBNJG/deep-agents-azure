@@ -45,7 +45,7 @@
           "deliver": "packages/contracts/, schemas exportados y fixtures de contrato.",
           "accept": "Serialización/deserialización conserva Decimal y versiones; rechaza campos inválidos. Ningún schema expuesto al LLM permite elegir identidad efectiva.",
           "id": "B00.3",
-          "status": "TODO",
+          "status": "READY_FOR_REVIEW",
           "depends_on": [
             "B00.2"
           ]

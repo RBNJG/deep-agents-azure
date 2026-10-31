@@ -1,0 +1,188 @@
+{
+  "compare_quotes": {
+    "additionalProperties": false,
+    "properties": {
+      "project_id": {
+        "maxLength": 256,
+        "minLength": 1,
+        "title": "Project Id",
+        "type": "string"
+      },
+      "quote_version_ids": {
+        "items": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+        },
+        "minItems": 1,
+        "title": "Quote Version Ids",
+        "type": "array"
+      }
+    },
+    "required": [
+      "project_id",
+      "quote_version_ids"
+    ],
+    "title": "CompareQuotesInput",
+    "type": "object"
+  },
+  "create_purchase_request": {
+    "additionalProperties": false,
+    "properties": {
+      "justification": {
+        "maxLength": 256,
+        "minLength": 1,
+        "title": "Justification",
+        "type": "string"
+      },
+      "project_id": {
+        "maxLength": 256,
+        "minLength": 1,
+        "title": "Project Id",
+        "type": "string"
+      },
+      "quote_version_ids": {
+        "items": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+        },
+        "minItems": 1,
+        "title": "Quote Version Ids",
+        "type": "array"
+      }
+    },
+    "required": [
+      "project_id",
+      "quote_version_ids",
+      "justification"
+    ],
+    "title": "CreatePurchaseRequestInput",
+    "type": "object"
+  },
+  "get_inventory": {
+    "additionalProperties": false,
+    "properties": {
+      "project_id": {
+        "maxLength": 256,
+        "minLength": 1,
+        "title": "Project Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "project_id"
+    ],
+    "title": "ProjectInput",
+    "type": "object"
+  },
+  "get_project_quotes": {
+    "additionalProperties": false,
+    "properties": {
+      "project_id": {
+        "maxLength": 256,
+        "minLength": 1,
+        "title": "Project Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "project_id"
+    ],
+    "title": "ProjectInput",
+    "type": "object"
+  },
+  "get_purchasing_policy": {
+    "additionalProperties": false,
+    "properties": {
+      "project_id": {
+        "maxLength": 256,
+        "minLength": 1,
+        "title": "Project Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "project_id"
+    ],
+    "title": "ProjectInput",
+    "type": "object"
+  },
+  "propose_skill_revision": {
+    "additionalProperties": false,
+    "properties": {
+      "feedback_id": {
+        "maxLength": 256,
+        "minLength": 1,
+        "title": "Feedback Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "feedback_id"
+    ],
+    "title": "ProposeSkillRevisionInput",
+    "type": "object"
+  },
+  "request_supplier_clarification": {
+    "additionalProperties": false,
+    "properties": {
+      "message": {
+        "maxLength": 256,
+        "minLength": 1,
+        "title": "Message",
+        "type": "string"
+      },
+      "quote_id": {
+        "maxLength": 256,
+        "minLength": 1,
+        "title": "Quote Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "quote_id",
+      "message"
+    ],
+    "title": "RequestSupplierClarificationInput",
+    "type": "object"
+  },
+  "save_comparison_report": {
+    "additionalProperties": false,
+    "properties": {
+      "comparison_id": {
+        "maxLength": 256,
+        "minLength": 1,
+        "title": "Comparison Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "comparison_id"
+    ],
+    "title": "SaveComparisonReportInput",
+    "type": "object"
+  },
+  "submit_purchase_request": {
+    "additionalProperties": false,
+    "properties": {
+      "expected_version": {
+        "minimum": 1,
+        "title": "Expected Version",
+        "type": "integer"
+      },
+      "purchase_request_id": {
+        "maxLength": 256,
+        "minLength": 1,
+        "title": "Purchase Request Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "purchase_request_id",
+      "expected_version"
+    ],
+    "title": "SubmitPurchaseRequestInput",
+    "type": "object"
+  }
+}
