@@ -1,0 +1,16 @@
+{
+  "money": {"amount": "123.4500", "currency": "EUR"},
+  "run": {
+    "id": "run-1", "thread_id": "thread-1", "tenant_id": "tenant-1",
+    "owner_id": "user-1", "project_id": "project-1", "status": "QUEUED",
+    "version": 7, "commit": "commit-1", "image_digest": "image-1",
+    "model_config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "skill_set_version": "1", "policy_version": "1", "dataset_version": "1",
+    "schema_version": "v0"
+  },
+  "command": {
+    "schema_version": "v0", "command_id": "command-1", "environment_id": "local",
+    "run_id": "run-1", "thread_id": "thread-1", "expected_version": 7,
+    "operation": "start", "correlation_id": "correlation-1"
+  }
+}
