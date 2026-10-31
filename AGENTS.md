@@ -2,6 +2,16 @@
 
 Este archivo es la guía vigente para trabajar en Procurement Agent Workbench. Complementa las instrucciones del usuario y no reemplaza instrucciones de alcance más específico en subdirectorios.
 
+## Orquestación de implementaciones con OpenSpec
+
+- Trabaja siempre con OpenSpec: selecciona cambio y subbloque, consulta estado e instrucciones y lee sus artefactos antes de implementar. Si faltan, prepáralos con la skill correspondiente respetando su límite de planificación y la autorización vigente. No apliques el bloque entero por defecto.
+- Para las implementaciones, delega explícitamente el razonamiento en `planner`, el código en `worker` y la revisión independiente en `reviewer`. El coordinador integra y mantiene el handoff y el índice. Puede reutilizar un plan existente comprobado; no necesita volver a generarlo.
+- Coordinador, `planner`, `reviewer` y cualquier agente que investigue o tome decisiones usan **`gpt-6.1-sol` con esfuerzo `high`**. Solo la implementación de tareas ya razonadas usa **`gpt-6-luna` con esfuerzo `medium`**. El worker devuelve las decisiones abiertas al planner.
+- La configuración está en [.codex/config.toml](.codex/config.toml) y los roles en [.codex/agents/](.codex/agents/). Sigue [la guía de agentes](docs/DEVELOPMENT_AGENTS.md) para delegar, activar y comprobar modelos. Si el host no carga roles, aplica explícitamente ese mismo modelo/esfuerzo e instrucciones; usa contexto mínimo y `fork_turns=none` cuando el host lo requiera para cambiar modelo. Si no lo admite, informa del límite antes de atribuir la separación de costes a la sesión.
+- Secuencial por defecto: plan → implementación → revisión → correcciones. Como máximo dos subagentes concurrentes, solo para trabajo independiente. Los subagentes no delegan a otros agentes. No crees agentes para saludos o preguntas sin trabajo de implementación.
+- Cada delegación define cambio, subbloque, casillas, decisiones, archivos propios, dependencias, criterios y validaciones. Los workers no están solos: deben conservar cambios ajenos. Coordina contratos, lockfile y migraciones con un único responsable.
+- La revisión contrasta diff y OpenSpec; las correcciones vuelven al worker. El coordinador solo propone `READY_FOR_REVIEW`; `DONE` y archivo requieren cumplir los criterios y la revisión establecida.
+
 ## Antes de cambiar código
 
 - Lee `docs/PROJECT_CONTEXT.md`, `docs/CONTRACTS.md`, `docs/DEVELOPMENT_PLAN.md`, el encargo `docs/tasks/<BLOQUE>.md` y los handoffs de sus dependencias.

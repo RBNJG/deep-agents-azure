@@ -11,6 +11,10 @@ context: |
   docs/tasks/index.json conserva estados de revisión; las casillas OpenSpec registran
   implementación y comprobaciones, no sustituyen la revisión ni autorizan pasar a DONE.
   No desplegar Azure ni llamar modelos reales sin configuración y presupuesto de la sesión.
+  Para implementaciones, seguir docs/DEVELOPMENT_AGENTS.md: delegar razonamiento y
+  revisión a gpt-6.1-sol/high y código acotado a gpt-6-luna/medium. Secuencial por
+  defecto, sin subdelegación. Las tareas transversales DEV de herramientas se
+  registran aparte en tooling_tasks, con cambio OpenSpec y handoff propios.
 rules:
   proposal:
     - Redactar en español e identificar bloque, fuentes, dependencias y exclusiones.

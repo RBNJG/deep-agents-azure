@@ -5,6 +5,18 @@
   "core_blocks": 12,
   "core_subblocks": 48,
   "optional_subblocks": 4,
+  "tooling_tasks": [
+    {
+      "id": "DEV.1",
+      "title": "Configurar agentes de desarrollo con OpenSpec",
+      "mode": "LOCAL",
+      "status": "READY_FOR_REVIEW",
+      "depends_on": [],
+      "change": "dev-agent-orchestration",
+      "source": "docs/tasks/DEV.md",
+      "handoff": "docs/handoffs/DEV.1.md"
+    }
+  ],
   "blocks": [
     {
       "id": "B00",
