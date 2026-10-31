@@ -1,0 +1,16 @@
+.git
+.venv
+.cache
+__pycache__
+**/__pycache__
+.env
+.env.*
+!.env.example
+docs
+tests
+dist
+.agents
+.github
+.vscode
+openspec
+*.log

@@ -1,0 +1,37 @@
+schema: spec-driven
+githubCopilot:
+  cloudAgent: false
+context: |
+  Procurement Agent Workbench. La planificación existente se incorpora progresivamente,
+  sin presentar capacidades futuras como implementadas. Antes de trabajar, leer AGENTS.md,
+  docs/PROJECT_CONTEXT.md, docs/CONTRACTS.md, docs/DEVELOPMENT_PLAN.md,
+  docs/EXECUTION_GUIDE.md, el bloque asignado en docs/tasks/ y los handoffs de sus dependencias.
+  Respetar los ADRs aceptados de docs/adr/. docs/OPENSPEC_WORKFLOW.md define la trazabilidad.
+  Un cambio corresponde a un bloque; cada encargo implementa solo un subbloque explícito.
+  docs/tasks/index.json conserva estados de revisión; las casillas OpenSpec registran
+  implementación y comprobaciones, no sustituyen la revisión ni autorizan pasar a DONE.
+  No desplegar Azure ni llamar modelos reales sin configuración y presupuesto de la sesión.
+rules:
+  proposal:
+    - Redactar en español e identificar bloque, fuentes, dependencias y exclusiones.
+    - Separar hechos comprobados, trabajo pendiente y decisiones todavía abiertas.
+  design:
+    - Referenciar contratos y ADRs sin redefinirlos; justificar decisiones nuevas y sus límites.
+    - Distinguir pruebas locales, dobles, LLM real y Azure real.
+  specs:
+    - Mantener los encabezados y palabras normativas que requiere el formato OpenSpec.
+    - Escribir requisitos y escenarios verificables, trazables a los IDs Bxx.y originales.
+  tasks:
+    - Agrupar por subbloque Bxx.y y conservar dependencias, entregables y criterios de aceptación.
+    - Incluir pruebas, handoff y actualización del índice por subbloque.
+    - No marcar trabajo heredado como DONE sin verificar su evidencia y estado de revisión.
+operations:
+  apply:
+    guidance:
+      - Aplicar únicamente el subbloque autorizado; detenerse en su límite aunque queden otras casillas.
+      - Empezar por validaciones económicas; registrar comandos y resultados realmente observados.
+      - Mantener las casillas y docs/tasks/index.json coherentes, preservando READY_FOR_REVIEW.
+  archive:
+    guidance:
+      - No archivar un bloque con subbloques pendientes o dependencias externas sin resolver.
+      - Verificar la puerta de salida del bloque, los handoffs y los estados antes de archivar.

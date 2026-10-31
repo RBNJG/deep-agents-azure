@@ -1,0 +1,58 @@
+[build-system]
+requires = ["hatchling==1.27.0", "editables==0.5"]
+build-backend = "hatchling.build"
+
+[project]
+name = "procurement-agent-workbench"
+version = "0.1.0"
+description = "Procurement Agent Workbench: service foundation"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi==0.162.0",
+    "pydantic-settings==2.16.2",
+    "uvicorn==0.54.0",
+]
+
+[project.scripts]
+paw-api = "apps.api.main:main"
+paw-worker = "apps.worker.main:main"
+paw-mcp = "apps.mcp_server.main:main"
+
+[dependency-groups]
+dev = [
+    "editables==0.5",
+    "httpx==0.28.1",
+    "mypy==2.4.1",
+    "pytest==9.2.0",
+    "ruff==0.17.3",
+    "uv==0.13.6",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["apps", "packages"]
+dev-mode-exact = true
+
+[tool.hatch.build.targets.sdist]
+include = ["apps", "packages", "pyproject.toml", "README.md", "LICENSE"]
+
+[tool.uv]
+required-version = "==0.13.6"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+strict = true
+files = ["apps", "packages", "scripts", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = ["local: local tests without model or Azure calls"]

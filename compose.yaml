@@ -1,0 +1,44 @@
+name: procurement-workbench
+
+x-service: &service
+  build: .
+  init: true
+  read_only: true
+  tmpfs:
+    - /tmp
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+
+services:
+  api:
+    <<: *service
+    command: ["paw-api"]
+    environment:
+      PAW_ENVIRONMENT_ID: ${PAW_ENVIRONMENT_ID:?Set PAW_ENVIRONMENT_ID in .env}
+      PAW_PROFILE: local
+      PAW_HOST: 0.0.0.0
+      PAW_API_PORT: 8000
+    ports:
+      - "127.0.0.1:${PAW_API_PORT:-8000}:8000"
+  mcp:
+    <<: *service
+    command: ["paw-mcp"]
+    environment:
+      PAW_ENVIRONMENT_ID: ${PAW_ENVIRONMENT_ID:?Set PAW_ENVIRONMENT_ID in .env}
+      PAW_PROFILE: local
+      PAW_HOST: 0.0.0.0
+      PAW_MCP_PORT: 8000
+    ports:
+      - "127.0.0.1:${PAW_MCP_PORT:-8001}:8000"
+  worker:
+    <<: *service
+    command: ["paw-worker"]
+    environment:
+      PAW_ENVIRONMENT_ID: ${PAW_ENVIRONMENT_ID:?Set PAW_ENVIRONMENT_ID in .env}
+      PAW_PROFILE: local
+      PAW_HOST: 0.0.0.0
+      PAW_WORKER_PORT: 8000
+    ports:
+      - "127.0.0.1:${PAW_WORKER_PORT:-8002}:8000"
